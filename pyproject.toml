@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xiaohongshu-scrape-posts"
+version = "0.1.0"
+description = "Local Xiaohongshu lead crawling, filtering, and Feishu sync automation for InsForge."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4",
+  "openpyxl",
+  "playwright",
+  "requests",
+]
+
+[project.scripts]
+xhs-leads = "xiaohongshu_scrape_posts.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

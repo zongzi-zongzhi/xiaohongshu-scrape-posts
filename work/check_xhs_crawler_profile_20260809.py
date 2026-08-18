@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -12,7 +13,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
-PROFILE = Path.home() / ".xiaohongshu" / "browser-data-insforge-20260802"
+PROFILE = Path(os.environ.get("XHS_BROWSER_PROFILE_DIR") or Path.home() / ".xiaohongshu" / "browser-data-insforge-20260802")
 PROXY = "http://127.0.0.1:18089"
 
 

@@ -13,9 +13,11 @@ from typing import Any
 from urllib.parse import urlparse
 
 try:
-    import xhs_rules_doc
+    from .. import rules as xhs_rules_doc
 except Exception:
     xhs_rules_doc = None
+
+from ..paths import OUTPUTS_DIR, PROJECT_ROOT, WORK_DIR
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -23,9 +25,8 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
-ROOT = Path(__file__).resolve().parents[1]
-OUT_DIR = ROOT / "outputs"
-WORK_DIR = ROOT / "work"
+ROOT = PROJECT_ROOT
+OUT_DIR = OUTPUTS_DIR
 POINTER_JSON = OUT_DIR / "xhs_insforge_master_pointer.json"
 RULES = xhs_rules_doc.RULES if xhs_rules_doc is not None else None
 
@@ -378,8 +379,6 @@ def main() -> int:
     parser.add_argument("--source-json", type=Path, help="Local JSON produced by the daily XHS crawl. Defaults to source_json in the pointer.")
     parser.add_argument("--dry-run", action="store_true", help="Read source and fixed table, but do not write records or update pointer.")
     parser.add_argument("--no-update-pointer", action="store_true", help="Do not update outputs/xhs_insforge_master_pointer.json after a successful append.")
-    parser.add_argument("--append-limit", type=int, default=None, help="Override the rules document append limit for a one-off backfill.")
-    parser.add_argument("--append-min", type=int, default=None, help="Override the rules document append minimum for a one-off backfill.")
     args = parser.parse_args()
 
     pointer = load_pointer()
@@ -394,12 +393,10 @@ def main() -> int:
     write_fields, missing_optional_fields = resolve_write_fields(fixed_field_names)
     existing_keys, existing_count_before, existing_pages = existing_note_keys()
     pending_rows, duplicate_count = unique_new_rows(source_rows, existing_keys, write_fields)
-    append_limit = args.append_limit if args.append_limit is not None else APPEND_LIMIT
-    append_min = args.append_min if args.append_min is not None else APPEND_MIN
     rows_before_append_limit = len(pending_rows)
-    rows_skipped_by_append_limit = max(0, rows_before_append_limit - append_limit)
+    rows_skipped_by_append_limit = max(0, rows_before_append_limit - APPEND_LIMIT)
     if rows_skipped_by_append_limit:
-        pending_rows = pending_rows[:append_limit]
+        pending_rows = pending_rows[:APPEND_LIMIT]
     payload_path = write_payload(pending_rows, run_tag, write_fields)
 
     uploaded = 0
@@ -425,14 +422,12 @@ def main() -> int:
         "source_rows": len(source_rows),
         "existing_records_before": existing_count_before,
         "duplicates_skipped": duplicate_count,
-        "append_min": append_min,
-        "append_limit": append_limit,
-        "append_min_source": "cli" if args.append_min is not None else "rules_doc",
-        "append_limit_source": "cli" if args.append_limit is not None else "rules_doc",
+        "append_min": APPEND_MIN,
+        "append_limit": APPEND_LIMIT,
         "rules_doc": RULES.as_meta() if RULES is not None else {},
-        "append_min_target_met": len(pending_rows) >= append_min,
+        "append_min_target_met": len(pending_rows) >= APPEND_MIN,
         "append_min_warning": ""
-        if len(pending_rows) >= append_min
+        if len(pending_rows) >= APPEND_MIN
         else "fewer than 25 unique new rows available after dedupe/final exclusion; crawler should expand keywords, but append script will not duplicate existing rows or lower quality.",
         "rows_before_append_limit": rows_before_append_limit,
         "rows_skipped_by_append_limit": rows_skipped_by_append_limit,
