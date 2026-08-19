@@ -9,7 +9,7 @@ The project is designed for a daily local automation. It only crawls and organiz
 The automation reads a human-editable Markdown rule document before each run:
 
 ```powershell
-D:\czj note\小红书 InsForge 建联线索池规则总结.md
+D:\note\小红书 InsForge 建联线索池规则总结.md
 ```
 
 You can override it with:
