@@ -11,6 +11,11 @@ from .crawler import legacy
 from .paths import PROJECT_ROOT
 
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+
 def run_module(module: str, args: list[str]) -> int:
     command = [sys.executable, "-m", module, *args]
     return subprocess.run(command, cwd=PROJECT_ROOT, env=legacy.python_env(), check=False).returncode

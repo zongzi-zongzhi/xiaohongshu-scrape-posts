@@ -35,6 +35,7 @@ htmlcov/
 .venv/
 venv/
 env/
+*.egg-info/
 
 # Node dependencies and build outputs
 node_modules/
